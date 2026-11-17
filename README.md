@@ -47,7 +47,7 @@ deadline, prize, winners and deliverables heuristics).
 | Product | Use |
 |---|---|
 | **Firebase AI Logic** | hybrid inference (`PREFER_ON_DEVICE`), Gemini Developer API backend |
-| **App Check** | reCAPTCHA v3 in production, debug token on localhost or with `?appcheck-debug` |
+| **App Check** | reCAPTCHA Enterprise provider, enforced on AI Logic (debug token supported with `?appcheck-debug`) |
 | **Authentication** | anonymous sign-in, so each visitor has a private pipeline |
 | **Firestore** | `users/{uid}/briefs`, with field-whitelisted security rules in [`firestore.rules`](firestore.rules) |
 | **Remote Config** | `inference_mode`, `cloud_model`, `red_flags` ([template](remoteconfig.template.json)) |

@@ -31,12 +31,13 @@ export async function initFirebase(log = () => {}) {
   ]);
   const app = initializeApp(firebaseConfig);
 
-  // App Check is required by Firebase AI Logic. Debug tokens are accepted for local judging.
-  if (location.hostname === 'localhost' || new URLSearchParams(location.search).has('appcheck-debug')) {
+  // App Check (reCAPTCHA Enterprise) is enforced on Firebase AI Logic. For local judging with a
+  // registered debug token, open the app with ?appcheck-debug.
+  if (new URLSearchParams(location.search).has('appcheck-debug')) {
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
   if (appCheckSiteKey) {
-    appCheck.initializeAppCheck(app, { provider: new appCheck.ReCaptchaV3Provider(appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+    appCheck.initializeAppCheck(app, { provider: new appCheck.ReCaptchaEnterpriseProvider(appCheckSiteKey), isTokenAutoRefreshEnabled: true });
   }
 
   // Remote Config: red-flag rules, cloud model and default mode can change without a redeploy.
