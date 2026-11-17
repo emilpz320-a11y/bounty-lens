@@ -116,7 +116,31 @@ async function run() {
 async function renderStatus() {
   const dev = await onDeviceStatus();
   const devPill = h('span', { class: `pill ${dev === 'available' ? 'on_device' : 'neutral'}` }, `Gemini Nano: ${dev}`);
-  setStatus([devPill, h('span', { class: `pill ${state.configured ? 'in_cloud' : 'neutral'}` }, state.configured ? 'Firebase AI Logic: ready' : 'Firebase: not configured')]);
+  const parts = [devPill, h('span', { class: `pill ${state.configured ? 'in_cloud' : 'neutral'}` }, state.configured ? 'Firebase AI Logic: ready' : 'Firebase: not configured')];
+  if (dev === 'downloadable' || dev === 'downloading') {
+    parts.push(h('button', { class: 'btn ghost', type: 'button', id: 'enableNano', onclick: enableNano }, dev === 'downloading' ? 'Downloading Gemini Nano…' : 'Enable on-device model'));
+  }
+  setStatus(parts);
+}
+
+// Chrome needs a user gesture to start the one-time Gemini Nano download.
+async function enableNano(e) {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  try {
+    const session = await self.LanguageModel.create({
+      expectedInputs: [{ type: 'text', languages: ['en'] }],
+      expectedOutputs: [{ type: 'text', languages: ['en'] }],
+      monitor(m) {
+        m.addEventListener('downloadprogress', (ev) => { btn.textContent = `Downloading Gemini Nano… ${Math.round(ev.loaded * 100)}%`; });
+      },
+    });
+    session.destroy?.();
+  } catch (err) {
+    btn.textContent = `On-device model unavailable (${err.name})`;
+    return;
+  }
+  await renderStatus();
 }
 
 async function boot() {
