@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each (anonymous) user can only read and write their own briefs.
+    match /users/{uid}/briefs/{briefId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['title','deadline','prizePoolUsd','winners','payPerSubmission','eligibility','deliverables','blockers','effortHours','verdict','reason','localFlags','source','savedAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() <= 140
+        && request.resource.data.verdict in ['GO','SKIP','REVIEW'];
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

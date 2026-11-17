@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bounty Lens</title>
+  <meta name="description" content="Triage hackathons and bounties privately: Gemini Nano on your device first, Gemini in the cloud only when needed, via Firebase AI Logic.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ccircle cx='14' cy='14' r='7' stroke='white' stroke-width='3' fill='none'/%3E%3Cpath d='M19 19l6 6' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap row">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><circle cx="14" cy="14" r="7"/><path d="M19 19l6 6"/></svg>
+        <div><strong>Bounty Lens</strong><span>private triage for hackathons &amp; bounties</span></div>
+      </div>
+      <div class="status" id="status" aria-live="polite">Starting…</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card input">
+      <div class="head">
+        <h1>Is this opportunity worth your weekend?</h1>
+        <p class="muted">Paste a hackathon, bounty or grant page. Bounty Lens extracts deadline, prizes, eligibility and deliverables, flags anything that needs your money or a student ID, and estimates dollars per hour. It runs on <b>Gemini Nano on your device</b> first, so the page never leaves your computer. If your device can't run it, it falls back to <b>Gemini in the cloud</b> through Firebase AI Logic.</p>
+      </div>
+      <label for="page" class="lbl">Page text</label>
+      <textarea id="page" rows="9" placeholder="Paste the rules / overview / prizes section here (Ctrl+A, Ctrl+C on the page)…"></textarea>
+      <div class="controls">
+        <label class="lbl inline" for="mode">Inference</label>
+        <select id="mode">
+          <option value="prefer_on_device">Prefer on-device (private)</option>
+          <option value="only_on_device">Only on-device</option>
+          <option value="prefer_in_cloud">Prefer cloud</option>
+          <option value="only_in_cloud">Only cloud</option>
+        </select>
+        <label class="lbl inline" for="chance">My win chance</label>
+        <select id="chance">
+          <option value="0.02">2% (big crowd)</option>
+          <option value="0.05" selected>5%</option>
+          <option value="0.1">10%</option>
+          <option value="0.25">25% (few entrants)</option>
+        </select>
+        <button id="sample" class="btn ghost" type="button">Try a sample</button>
+        <button id="go" class="btn primary" type="button">Triage</button>
+      </div>
+      <div id="flags" class="flags" aria-live="polite"></div>
+    </section>
+
+    <section id="result" class="card result" hidden></section>
+
+    <section class="card">
+      <div class="head row">
+        <h2>My pipeline</h2>
+        <span class="muted small" id="pipeMeta"></span>
+      </div>
+      <div id="pipeline"></div>
+    </section>
+
+    <section class="card how">
+      <h2>How it works</h2>
+      <ol>
+        <li><b>Local scan first.</b> Regex rules (from Firebase Remote Config) flag deposits, trading, KYC, students-only, in-person and country limits before any model runs.</li>
+        <li><b>Hybrid inference.</b> Firebase AI Logic in <code>PREFER_ON_DEVICE</code> mode runs Gemini Nano through Chrome's built-in Prompt API with a JSON-schema constraint, and switches to cloud Gemini only if the device can't.</li>
+        <li><b>Strict merge.</b> Local rules can only make a verdict stricter, and past deadlines are always SKIP.</li>
+        <li><b>Rank.</b> Expected value per hour = prize per winner × your win chance ÷ effort, with GO items first.</li>
+        <li><b>Sync.</b> Briefs save to Firestore under an anonymous Firebase Auth user, and App Check protects the AI endpoint.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <span>Built with Firebase AI Logic (hybrid inference), App Check, Auth, Firestore and Remote Config.</span>
+    <span><a href="https://github.com/emilpz320-a11y/bounty-lens">Source</a></span>
+  </footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
