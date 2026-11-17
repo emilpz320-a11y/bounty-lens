@@ -4,5 +4,5 @@
   "private": true,
   "type": "module",
   "scripts": { "test": "node --test \"test/*.test.mjs\"" },
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

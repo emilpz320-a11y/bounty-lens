@@ -74,4 +74,4 @@ test/rules.test.mjs    node:test suite
 firestore.rules        security rules
 ```
 
-MIT licensed.
+Apache-2.0 licensed.
