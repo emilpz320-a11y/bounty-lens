@@ -102,6 +102,7 @@ async function run() {
   let runInfo = { source: 'none', ms: 0, text: '{}' };
   try {
     runInfo = await triage(buildPrompt(text));
+    await renderStatus();
   } catch (e) {
     console.warn('model call failed', e);
     setStatus([h('span', { class: 'pill none' }, 'Model unavailable'), `Used local rules only (${e.code || e.message}).`]);
@@ -112,12 +113,16 @@ async function run() {
   btn.textContent = 'Triage';
 }
 
-async function boot() {
-  const logs = [];
-  await initFirebase((m) => logs.push(m));
+async function renderStatus() {
   const dev = await onDeviceStatus();
   const devPill = h('span', { class: `pill ${dev === 'available' ? 'on_device' : 'neutral'}` }, `Gemini Nano: ${dev}`);
   setStatus([devPill, h('span', { class: `pill ${state.configured ? 'in_cloud' : 'neutral'}` }, state.configured ? 'Firebase AI Logic: ready' : 'Firebase: not configured')]);
+}
+
+async function boot() {
+  const logs = [];
+  await initFirebase((m) => logs.push(m));
+  await renderStatus();
   logs.forEach((m) => console.info('[bounty-lens]', m));
   $('#mode').value = state.remote.mode;
   $('#mode').addEventListener('change', (e) => setMode(e.target.value));
