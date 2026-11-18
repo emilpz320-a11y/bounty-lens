@@ -1,6 +1,6 @@
 """Builds media/bountylens-demo.mp4 (< 3 min): title slides + real app screenshots + Windows TTS narration.
 
-Usage: python media/make_video.py <folder with s1-start.png, s2-flags.png, s3-device.png, s4-cloud.png, s5-pipeline.png>
+Usage: python media/make_video.py <folder with s1-start.jpg, s2-flags.jpg, s3-device.jpg, s4-cloud.jpg, s5-pipeline.jpg>
 """
 import subprocess
 import sys
@@ -63,16 +63,26 @@ S3 = slide(3, "Try it", [
 ])
 
 D = lambda name: SHOTS / name
+ON_DEVICE = (SHOTS / "s3-device.jpg").exists()
+if ON_DEVICE:
+    S1_SHOT = (D("s1-start.jpg"), "Paste a page. The status bar shows that Gemini Nano is available on this machine, and that Firebase AI Logic is ready as a cloud fallback.")
+    S3_SHOT = (D("s3-device.jpg"), "With prefer on device, Firebase AI Logic runs Gemini Nano through Chrome's built in Prompt A P I, constrained to a J S O N schema. The page never leaves the computer. The result shows the deadline, the prize per winner, the deliverables, the blockers, a verdict, and expected dollars per hour.")
+    S4_SHOT = (D("s4-cloud.jpg"), "If the device can't run the model, the same request goes to Gemini in the cloud with the same schema, so the interface does not change. Every result says where it ran and how long it took.")
+else:  # cloud-only recording: the recording machine cannot run Gemini Nano
+    S1_SHOT = (D("s1-start.jpg"), "Paste a page. The status bar shows whether Gemini Nano can run on this machine. On the computer used for this recording it is unavailable, so Firebase AI Logic is ready to use the cloud instead.")
+    S3_SHOT = None
+    S4_SHOT = (D("s4-cloud.jpg"), "When Gemini Nano is available, prefer on device mode runs it through Chrome's built in Prompt A P I, and the page never leaves the computer. Here the device can't run it, so the same request, with the same J S O N schema, goes to Gemini in the cloud. The result shows the deadline, the prize per winner, the deliverables, the blockers, a verdict and expected dollars per hour, and says where it ran and how long it took.")
 SEGMENTS = [
     (S1, "Solo builders read dozens of hackathon and bounty pages a week. The expensive part is the fine print. Bounty Lens reads it for you, privately, on your own device."),
-    (D("s1-start.png"), "Paste a page. The status bar shows that Gemini Nano is available on this machine, and that Firebase AI Logic is ready as a cloud fallback."),
-    (D("s2-flags.png"), "Before any model runs, a local scan flags anything that needs your money, a student I D, K Y C or attendance in person. The rules come from Remote Config, and negations like no entry fee are ignored."),
-    (D("s3-device.png"), "With prefer on device, Firebase AI Logic runs Gemini Nano through Chrome's built in Prompt A P I, constrained to a J S O N schema. The page never leaves the computer. The result shows the deadline, the prize per winner, the deliverables, the blockers, a verdict, and expected dollars per hour."),
-    (D("s4-cloud.png"), "If the device can't run the model, the same request goes to Gemini in the cloud with the same schema, so the interface does not change. Every result says where it ran and how long it took."),
-    (D("s5-pipeline.png"), "Saved briefs sync to Firestore under an anonymous Firebase user, and the pipeline ranks them: go first, then the best dollars per hour, then the nearest deadline."),
+    S1_SHOT,
+    (D("s2-flags.jpg"), "Before any model runs, a local scan flags anything that needs your money, a student I D, K Y C or attendance in person. The rules come from Remote Config, and negations like no entry fee are ignored."),
+    S3_SHOT,
+    S4_SHOT,
+    (D("s5-pipeline.jpg"), "Saved briefs sync to Firestore under an anonymous Firebase user, and the pipeline ranks them: go first, then the best dollars per hour, then the nearest deadline."),
     (S2, "Under the hood: a deterministic scan from Remote Config, hybrid inference with one schema for both paths, local rules that can only make a verdict stricter, and App Check, Auth and Firestore with field level security rules."),
     (S3, "Try Bounty Lens on the web, and read the code on GitHub. Thank you."),
 ]
+SEGMENTS = [seg for seg in SEGMENTS if seg is not None]
 
 
 def tts(text: str, out: Path) -> float:
